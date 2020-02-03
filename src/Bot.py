@@ -61,7 +61,6 @@ class Bot(commands.Bot):
         logging.info(f'Watching: {read_channels}')
         logging.info(f'Copying to {copy_channels}')
 
-    """
     async def on_message_delete(self, message: discord.message):
         if message.author == self.user: return  # if message is from janet, prevents infinite loop
         if message.channel.guild.name != 'Developers Hub': return
@@ -105,7 +104,6 @@ class Bot(commands.Bot):
 
         await self.send_message(channels['edit_log'], content='\u200b', embed=embed)
         logging.info(f'{before.author.nick} edited a message in #{before.channel.name}')
-    """
 
     async def on_message(self, message: discord.message):
         if message.author == self.user: return  # if message is from janet, prevents infinite loop
