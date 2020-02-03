@@ -61,52 +61,6 @@ class Bot(commands.Bot):
         logging.info(f'Watching: {read_channels}')
         logging.info(f'Copying to {copy_channels}')
 
-    """
-    async def on_message_delete(self, message: discord.message):
-        if message.author == self.user: return  # if message is from janet, prevents infinite loop
-        if message.channel.guild.name != 'Developers Hub': return
-
-        embed = discord.Embed(title=f'Message deleted in #{message.channel.name}',
-                              color=0xff0000)  # red
-
-        nick = message.author.nick if message.author.nick is not None else str(message.author)[:-5]
-        embed.set_author(name=nick, icon_url=message.author.avatar_url)
-
-        embed.add_field(name='Author Username', value=message.author, inline=True)
-        embed.add_field(name='Author ID', value=message.author.id, inline=True)
-
-        created_at = message.created_at.strftime('%H:%M GMT on %d %b \'%y ')
-        embed.add_field(name="Created at", value=created_at, inline=False)
-
-        embed.add_field(name="Message Content", value=message.content, inline=False)
-
-        embed.timestamp = datetime.datetime.now(datetime.timezone.utc)
-
-        await self.send_message(channels['delete_log'], content='', embed=embed)
-        logging.info(f'A message by {message.author.nick} in #{message.channel.name} was deleted')
-
-    async def on_message_edit(self, before: discord.message, after: discord.message):
-        if before.author == self.user: return  # if message is from janet, prevents infinite loop
-        if before.channel.guild.name != 'Developers Hub': return
-        if before.content == after.content: return
-
-        embed = discord.Embed(title=f'Message edited in #{before.channel.name}',
-                              color=0x53ff00)  # green
-
-        nick = before.author.nick if before.author.nick is not None else str(before.author)[:-5]
-
-        embed.set_author(name=nick, icon_url=before.author.avatar_url)
-        embed.add_field(name='Username', value=before.author, inline=True)
-        embed.add_field(name='Discord ID', value=before.author.id, inline=True)
-        embed.add_field(name="Before", value=before.content, inline=False)
-        embed.add_field(name="After", value=after.content, inline=False)
-
-        embed.timestamp = datetime.datetime.now(datetime.timezone.utc)
-
-        await self.send_message(channels['edit_log'], content='\u200b', embed=embed)
-        logging.info(f'{before.author.nick} edited a message in #{before.channel.name}')
-    """
-
     async def on_message(self, message: discord.message):
         if message.author == self.user: return  # if message is from janet, prevents infinite loop
 
