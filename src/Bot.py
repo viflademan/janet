@@ -13,8 +13,6 @@ channels = {
     'the_void': 640279442878627850,
     'art_gallery': 612039801620660243,
     'content_requests': 353367822157479937,
-    'edit_log': 672313178197196821,
-    'delete_log': 673015035576188948
 }
 
 
@@ -47,19 +45,11 @@ class Bot(commands.Bot):
         self.run(token, bot=True, reconnect=True)
 
     async def on_ready(self):
-        read_channels = str()
-        copy_channels = str()
-
-        for channel_id in self.read_channel_ids.values():
-            read_channels += f'#{self.get_channel_name(channel_id)} '
-
-        for channel_id in self.copy_channel_ids.values():
-            copy_channels += f'#{self.get_channel_name(channel_id)} '
-
+        self.write_channels()
         logging.info(f' --------------- Bot started!')
         logging.info(f'{self.user} has connected to {self.guild_name}')
-        logging.info(f'Watching: {read_channels}')
-        logging.info(f'Copying to {copy_channels}')
+        logging.info(f'Watching: {self.get_read_channel_list()}')
+        logging.info(f'Copying to {self.get_copy_channel_list()}')
 
     async def on_message(self, message: discord.message):
         if message.author == self.user: return  # if message is from janet, prevents infinite loop
@@ -100,13 +90,32 @@ class Bot(commands.Bot):
 
         return channel.name
 
+    def get_read_channel_list(self):
+        read_channels = str()
+
+        for channel_id in self.read_channel_ids.values():
+            read_channels += f'#{self.get_channel_name(channel_id)} '
+
+        return read_channels
+
+    def get_copy_channel_list(self):
+        copy_channels = str()
+
+        for channel_id in self.copy_channel_ids.values():
+            copy_channels += f'#{self.get_channel_name(channel_id)} '
+
+        return copy_channels
+
     def write_channels(self):
         guild = discord.utils.get(self.guilds, name=self.guild_name)
         text = str()
 
         with open('channels.txt', mode='w', encoding='utf-8') as out_file:
             for channel in guild.text_channels:
-                text += f'{channel.name}: {channel.id},\n'
+                line = f'{channel.name}: {channel.id},\n'
+
+                print(line)
+                text += line
 
             out_file.write(text)
 

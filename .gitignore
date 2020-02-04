@@ -1,5 +1,8 @@
 # My ignores
 src/log.txt
+channels.txt
+files/
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
