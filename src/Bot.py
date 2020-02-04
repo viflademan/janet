@@ -45,7 +45,6 @@ class Bot(commands.Bot):
         self.run(token, bot=True, reconnect=True)
 
     async def on_ready(self):
-        self.write_channels()
         logging.info(f' --------------- Bot started!')
         logging.info(f'{self.user} has connected to {self.guild_name}')
         logging.info(f'Watching: {self.get_read_channel_list()}')
