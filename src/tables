@@ -1,0 +1,26 @@
+CREATE TABLE IF NOT EXISTS assets (
+    id integer PRIMARY KEY,
+    source_id integer NOT NULL,
+    sku integer NOT NULL,
+    product_name text NOT NULL,
+    path text NOT NULL,
+    filename text NOT NULL,
+    zip_size integer NOT NULL,
+    installed bool NOT NULL,
+    FOREIGN KEY (source_id) REFERENCES sources (id),
+    UNIQUE (filename, zip_size)
+);
+
+CREATE TABLE IF NOT EXISTS channels (
+    id integer PRIMARY KEY,
+    guild_id REFERENCES guilds (id),
+    name text NOT NULL,
+    copy_target integer,
+
+
+);
+
+CREATE TABLE IF NOT EXISTS guilds (
+    id integer PRIMARY KEY,
+    name text NOT NULL
+);
