@@ -66,25 +66,22 @@ class Bot(commands.Bot):
 
         # check if message has attachments
         # check if message in watched channels
-        if len(message.attachments) > 0 and message.channel.id in self.read_channel_ids.values():
+        elif len(message.attachments) > 0 and message.channel.id in self.read_channel_ids.values():
             for attachment in message.attachments:
-                self.reposts += 1
-                self.embeds += 1
 
-                embed = discord.Embed().set_image(url=attachment.url)
+                dimensions = str(attachment.width) + ' x ' + str(attachment.height)
+                size = self.get_size(attachment.size)
 
-                content = 'Posted by **' + message.author.display_name + '**'
+                embed = discord.Embed(color=0x31eb31)
+                embed.set_image(url=attachment.url)
+                embed.add_field(name="Artist", value=message.author.display_name, inline=True)
+                embed.add_field(name="Dimensions", value=dimensions, inline=True)
+                embed.add_field(name="Size", value=size, inline=True)
                 if len(message.content) > 0:
-                    content += '\n> ' + message.content
-
-                logging.info('-----------------')
-                logging.info(f'Filename: {attachment.filename}')
-                logging.info(f'Poster: {message.author.display_name}')
-                if len(message.content) > 0:
-                    logging.info(f'Message: {message.content}')
+                    embed.add_field(name="Message", value=message.content, inline=False)
 
                 for channel_id in self.copy_channel_ids.values():
-                    await self.send_message(channel_id, content, embed)
+                    await self.send_message(channel_id, None, embed)
 
         await self.process_commands(message)
 
@@ -110,3 +107,15 @@ class Bot(commands.Bot):
 
             out_file.write(text)
 
+    def get_size(self, size_raw, places=2):
+        if size_raw > 2 ** 30:
+            size = size_raw / 2 ** 30
+            ext = ' GB'
+        elif size_raw > 2 ** 20:
+            size = size_raw / 2 ** 20
+            ext = ' MB'
+        else:
+            size = size_raw / 2 ** 10
+            ext = ' KB'
+
+        return str(round(size, places)) + ext
