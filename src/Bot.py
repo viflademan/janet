@@ -49,31 +49,13 @@ class Bot(commands.Bot):
 
         # check if message has attachments
         # check if message in watched channels
-        if len(message.attachments) > 0 and message.channel.id in self.read_channel_ids.values():
-            for attachment in message.attachments:
-
-                embed = discord.Embed()
-                embed.set_image(url=attachment.url)
-
-                content = 'Posted by **' + message.author.display_name + '**'
-                if len(message.content) > 0:
-                    content += '\n> ' + message.content
-
-                logging.info('-----------------')
-                logging.info(f'Filename: {attachment.filename}')
-                logging.info(f'Poster: {message.author.display_name}')
-                if len(message.content) > 0:
-                    logging.info(f'Message: {message.content}')
-
-                for channel_id in self.copy_channel_ids.values():
-                    await self.send_message(channel_id, content, embed)
-        elif len(message.attachments) > 0 and message.channel.id == 640279442878627850:
+        elif len(message.attachments) > 0 and message.channel.id in self.read_channel_ids.values():
             for attachment in message.attachments:
 
                 dimensions = str(attachment.width) + ' x ' + str(attachment.height)
                 size = self.get_size(attachment.size)
 
-                embed = discord.Embed()
+                embed = discord.Embed(color=0x31eb31)
                 embed.set_image(url=attachment.url)
                 embed.add_field(name="Artist", value=message.author.display_name, inline=True)
                 embed.add_field(name="Dimensions", value=dimensions, inline=True)
@@ -81,7 +63,8 @@ class Bot(commands.Bot):
                 if len(message.content) > 0:
                     embed.add_field(name="Message", value=message.content, inline=False)
 
-                await self.send_message(640279442878627850, None, embed)
+                for channel_id in self.copy_channel_ids.values():
+                    await self.send_message(channel_id, None, embed)
 
         await self.process_commands(message)
 
@@ -127,8 +110,6 @@ class Bot(commands.Bot):
             out_file.write(text)
 
     def get_size(self, size_raw, places=2):
-        rnd = places * 10
-
         if size_raw > 2 ** 30:
             size = size_raw / 2 ** 30
             ext = ' GB'
@@ -139,5 +120,5 @@ class Bot(commands.Bot):
             size = size_raw / 2 ** 10
             ext = ' KB'
 
-        return str(round(size, 2)) + ext
+        return str(round(size, places)) + ext
 
