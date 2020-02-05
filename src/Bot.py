@@ -1,19 +1,14 @@
 # BotClient.py
+import json
 import logging
 import datetime
 import discord
 from discord.ext import commands
+from pathlib import Path
+
 from cogs.BaseCog import BaseCog
 from cogs.FactsCog import FactsCog
 from cogs.ServerManagement import ServerManagement
-
-channels = {
-    'sfw_other_artwork': 361137896578744320,
-    'nsfw_artwork': 353003422284513280,
-    'the_void': 640279442878627850,
-    'art_gallery': 612039801620660243,
-    'content_requests': 353367822157479937,
-}
 
 
 class Bot(commands.Bot):
@@ -24,6 +19,8 @@ class Bot(commands.Bot):
         self.token = token
         self.guild_name = guild_name
 
+        root = Path.cwd().parent
+        # todo redo this
         self.read_channel_ids = {
             'sfw': 361137896578744320,
             'nsfw': 353003422284513280
@@ -33,9 +30,6 @@ class Bot(commands.Bot):
         }
 
         self.init_datetime = datetime.datetime.now()
-        self.reposts = 0
-        self.embeds = 0
-
         self.last_fact = datetime.datetime.min
 
         self.add_cog(BaseCog(self))
@@ -57,10 +51,9 @@ class Bot(commands.Bot):
         # check if message in watched channels
         if len(message.attachments) > 0 and message.channel.id in self.read_channel_ids.values():
             for attachment in message.attachments:
-                self.reposts += 1
-                self.embeds += 1
 
-                embed = discord.Embed().set_image(url=attachment.url)
+                embed = discord.Embed()
+                embed.set_image(url=attachment.url)
 
                 content = 'Posted by **' + message.author.display_name + '**'
                 if len(message.content) > 0:
@@ -74,6 +67,21 @@ class Bot(commands.Bot):
 
                 for channel_id in self.copy_channel_ids.values():
                     await self.send_message(channel_id, content, embed)
+        elif len(message.attachments) > 0 and message.channel.id == 640279442878627850:
+            for attachment in message.attachments:
+
+                dimensions = str(attachment.width) + ' x ' + str(attachment.height)
+                size = self.get_size(attachment.size)
+
+                embed = discord.Embed()
+                embed.set_image(url=attachment.url)
+                embed.add_field(name="Artist", value=message.author.display_name, inline=True)
+                embed.add_field(name="Dimensions", value=dimensions, inline=True)
+                embed.add_field(name="Size", value=size, inline=True)
+                if len(message.content) > 0:
+                    embed.add_field(name="Message", value=message.content, inline=False)
+
+                await self.send_message(640279442878627850, None, embed)
 
         await self.process_commands(message)
 
@@ -117,4 +125,19 @@ class Bot(commands.Bot):
                 text += line
 
             out_file.write(text)
+
+    def get_size(self, size_raw, places=2):
+        rnd = places * 10
+
+        if size_raw > 2 ** 30:
+            size = size_raw / 2 ** 30
+            ext = ' GB'
+        elif size_raw > 2 ** 20:
+            size = size_raw / 2 ** 20
+            ext = ' MB'
+        else:
+            size = size_raw / 2 ** 10
+            ext = ' KB'
+
+        return str(round(size, 2)) + ext
 
