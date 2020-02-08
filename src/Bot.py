@@ -10,6 +10,8 @@ from cogs.BaseCog import BaseCog
 from cogs.FactsCog import FactsCog
 from cogs.ServerManagement import ServerManagement
 
+from SQLHandlers._SQLHandler import SQLHandler
+
 
 class Bot(commands.Bot):
 
@@ -19,16 +21,8 @@ class Bot(commands.Bot):
         self.token = token
         self.guild_name = guild_name
 
-        root = Path.cwd().parent
-        # todo redo this
-        self.read_channel_ids = {
-            'sfw': 361137896578744320,
-            'nsfw': 353003422284513280
-        }
-        self.copy_channel_ids = {
-            'gallery': 612039801620660243
-        }
-
+        self.root = Path.cwd().parent
+        self.db = SQLHandler(self.root)
         self.init_datetime = datetime.datetime.now()
         self.last_fact = datetime.datetime.min
 
@@ -39,17 +33,36 @@ class Bot(commands.Bot):
         self.run(token, bot=True, reconnect=True)
 
     async def on_ready(self):
+        self.init_db()
         logging.info(f' --------------- Bot started!')
         logging.info(f'{self.user} has connected to {self.guild_name}')
-        logging.info(f'Watching: {self.get_read_channel_list()}')
-        logging.info(f'Copying to {self.get_copy_channel_list()}')
+        # todo display channels
+        # logging.info(f'Watching: {self.get_read_channel_list()}')
+        # logging.info(f'Copying to {self.get_copy_channel_list()}')
+
+    def init_db(self):
+        for guild in self.guilds:
+            self.db.guilds.create_row(guild.id, guild.name)
+            for channel in guild.channels:
+                if isinstance(channel, discord.TextChannel):
+                    self.db.channels.create_row(channel.id, channel.name, None, guild.id, guild.name)
+
+        sfw = 361137896578744320
+        nsfw = 353003422284513280
+        art_gallery = 612039801620660243
+        void = 640279442878627850
+        void_gallery = 675576621079592970
+
+        self.db.channels.set_copy_target(sfw,  art_gallery)  # sfw copies to gallery
+        self.db.channels.set_copy_target(nsfw, art_gallery)  # nsfw copies to gallery
+        self.db.channels.set_copy_target(void, void_gallery)  # void to void_gallery
 
     async def on_message(self, message: discord.message):
         if message.author == self.user: return  # if message is from janet, prevents infinite loop
+        channel = self.db.channels.select_by_id(message.channel.id)
 
         # check if message has attachments
-        # check if message in watched channels
-        elif len(message.attachments) > 0 and message.channel.id in self.read_channel_ids.values():
+        if len(message.attachments) > 0 and channel.target_id is not None:
             for attachment in message.attachments:
 
                 dimensions = str(attachment.width) + ' x ' + str(attachment.height)
@@ -63,8 +76,7 @@ class Bot(commands.Bot):
                 if len(message.content) > 0:
                     embed.add_field(name="Message", value=message.content, inline=False)
 
-                for channel_id in self.copy_channel_ids.values():
-                    await self.send_message(channel_id, None, embed)
+                await self.send_message(target_id, None, embed)
 
         await self.process_commands(message)
 
