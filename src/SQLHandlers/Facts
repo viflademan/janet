@@ -1,0 +1,28 @@
+import logging
+from sqlite3 import Error as sqlError
+
+
+class Facts:
+
+    def __init__(self, connection):
+        self.connection = connection
+
+    def create_row(self,
+                   list_: str,
+                   pos: int,
+                   content: str):
+
+        row = (list_, pos, content)
+
+        sql = ''' 
+        INSERT INTO facts(list, pos, content) 
+        VALUES(?,?,?)
+        '''
+
+        try:
+            logging.info('Inserting fact into table')
+            logging.info(f'{list_} {pos}: {content}')
+            self.connection.cursor().execute(sql, row)
+            self.connection.commit()
+        except sqlError as e:
+            logging.critical(e)

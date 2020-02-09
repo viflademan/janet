@@ -37,6 +37,8 @@ class Bot(commands.Bot):
         logging.info(f' --------------- Bot started!')
         logging.info(f'{self.user} has connected to {self.guild_name}')
         # todo display channels
+        for channel in self.db.channels.select_if_target_id():
+            pass
         # logging.info(f'Watching: {self.get_read_channel_list()}')
         # logging.info(f'Copying to {self.get_copy_channel_list()}')
 
@@ -69,14 +71,22 @@ class Bot(commands.Bot):
                 size = self.get_size(attachment.size)
 
                 embed = discord.Embed(color=0x31eb31)
-                embed.set_image(url=attachment.url)
+                logging.info('---------------')
                 embed.add_field(name="Artist", value=message.author.display_name, inline=True)
+                logging.info('Artist: ' + message.author.display_name)
+                embed.set_image(url=attachment.url)
+                logging.info('URL: ' + attachment.url)
                 embed.add_field(name="Dimensions", value=dimensions, inline=True)
+                logging.info('Dimensions: ' + dimensions)
                 embed.add_field(name="Size", value=size, inline=True)
+                logging.info('Size: ' + str(size))
                 if len(message.content) > 0:
                     embed.add_field(name="Message", value=message.content, inline=False)
+                    logging.info('Message: ' + message.content)
+                logging.info('Source: ' + channel.name)
+                logging.info('Destination: ' + self.get_channel_name(channel.target_id))
 
-                await self.send_message(target_id, None, embed)
+                await self.send_message(channel.target_id, None, embed)
 
         await self.process_commands(message)
 

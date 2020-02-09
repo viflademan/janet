@@ -6,21 +6,19 @@ CREATE TABLE IF NOT EXISTS guilds (
 CREATE TABLE IF NOT EXISTS channels (
     id integer PRIMARY KEY,
     name text NOT NULL,
-    target_id integer,
-    guild_id REFERENCES guilds (id),
-    guild_name text NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS users (
-    id integer PRIMARY KEY,
-    nick text NOT NULL,
-    username text NOT NULL
+    target_id integer REFERENCES channels (id),
+    guild_id integer REFERENCES guilds (id)
 );
 
 CREATE TABLE IF NOT EXISTS facts (
     id integer PRIMARY KEY,
     list text NOT NULL,
     pos integer NOT NULL,
-    fact text NOT NULL,
-    UNIQUE (list, pos)
+    content text NOT NULL,
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id integer PRIMARY KEY,
+    nick text NOT NULL,
+    username text NOT NULL
 );
